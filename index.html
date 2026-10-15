@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foot Analyse</title>
+<style>
+body {
+  margin: 0;
+  padding: 18px;
+  background: #101827;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+header {
+  text-align: center;
+  padding: 18px;
+  background: #172b3a;
+  border-radius: 14px;
+}
+h1 { color: #45e39b; }
+.card {
+  background: #1b293a;
+  padding: 18px;
+  margin-top: 18px;
+  border-radius: 14px;
+}
+input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0 12px;
+  border: 1px solid #405168;
+  border-radius: 8px;
+  background: #101827;
+  color: white;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  background: #21b978;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: 0;
+  border-radius: 8px;
+}
+.result {
+  padding: 12px;
+  margin-top: 10px;
+  background: #26384b;
+  border-radius: 8px;
+}
+small { color: #b7c6d8; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ FOOT ANALYSE</h1>
+  <p>Analyse des corners et des hors-jeu</p>
+  <small>Version prototype — statistiques saisies manuellement</small>
+</header>
+
+<div class="card">
+  <h2>🏟️ Match</h2>
+  <label>Équipe à domicile</label>
+  <input id="home" placeholder="Ex. Arsenal">
+  <label>Équipe à l'extérieur</label>
+  <input id="away" placeholder="Ex. Chelsea">
+</div>
+
+<div class="card">
+  <h2>🚩 Moyennes de corners</h2>
+  <label>Corners obtenus à domicile</label>
+  <input id="ch" type="number" min="0" max="30" step="0.1" placeholder="Ex. 5.4">
+  <label>Corners obtenus à l'extérieur</label>
+  <input id="ca" type="number" min="0" max="30" step="0.1" placeholder="Ex. 4.2">
+</div>
+
+<div class="card">
+  <h2>⚖️ Moyennes de hors-jeu</h2>
+  <label>Hors-jeu de l'équipe à domicile</label>
+  <input id="oh" type="number" min="0" max="20" step="0.1" placeholder="Ex. 1.8">
+  <label>Hors-jeu de l'équipe à l'extérieur</label>
+  <input id="oa" type="number" min="0" max="20" step="0.1" placeholder="Ex. 1.2">
+</div>
+
+<div class="card">
+  <button onclick="analyser()">Analyser le match</button>
+  <div id="resultat" aria-live="polite"></div>
+</div>
+
+<script>
+function analyser() {
+  const ids = ["home", "away", "ch", "ca", "oh", "oa"];
+  const v = {};
+
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    v[id] = el.value.trim();
+    if (!v[id]) {
+      alert("Remplis tous les champs avant l'analyse.");
+      el.focus();
+      return;
+    }
+  }
+
+  const nombres = ["ch", "ca", "oh", "oa"];
+  for (const id of nombres) {
+    const n = Number(v[id]);
+    if (!Number.isFinite(n) || n < 0 ||
+        n > (id[0] === "c" ? 30 : 20)) {
+      alert("Vérifie les valeurs statistiques.");
+      document.getElementById(id).focus();
+      return;
+    }
+    v[id] = n;
+  }
+
+  const corners = v.ch + v.ca;
+  const horsJeu = v.oh + v.oa;
+
+  document.getElementById("resultat").innerHTML = `
+    <div class="result">
+      <h3>${escapeHTML(v.home)} - ${escapeHTML(v.away)}</h3>
+      <p>🚩 Corners moyens estimés : <b>${corners.toFixed(1)}</b></p>
+      <p>⚖️ Hors-jeu moyens estimés : <b>${horsJeu.toFixed(1)}</b></p>
+      <hr>
+      <small>
+        Ces valeurs sont des estimations calculées à partir
+        des moyennes saisies, et non des probabilités validées.
+        Aucune donnée en direct n'est connectée.
+      </small>
+    </div>`;
+}
+
+function escapeHTML(s) {
+  return s.replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[c]);
+}
+</script>
+
+</body>
+</html>
